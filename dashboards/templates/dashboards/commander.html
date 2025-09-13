@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IAF Commander Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .metric { font-size: 2em; font-weight: bold; color: #2563eb; }
+        .chart-container { height: 300px; }
+        h1 { color: #1f2937; }
+        h3 { color: #374151; margin-top: 0; }
+    </style>
+</head>
+<body>
+    <h1>IAF Commander Dashboard</h1>
+    
+    <div class="dashboard">
+        <div class="card">
+            <h3>Total Personnel</h3>
+            <div class="metric" id="totalPersonnel">-</div>
+        </div>
+        
+        <div class="card">
+            <h3>Average Readiness</h3>
+            <div class="metric" id="avgReadiness">-</div>
+        </div>
+        
+        <div class="card">
+            <h3>High Attrition Risk</h3>
+            <div class="metric" id="attritionRisk">-</div>
+        </div>
+        
+        <div class="card">
+            <h3>Leadership Potential</h3>
+            <div class="metric" id="leadershipPotential">-</div>
+        </div>
+        
+        <div class="card">
+            <h3>Unit Distribution</h3>
+            <div class="chart-container">
+                <canvas id="unitChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Rank Distribution</h3>
+            <div class="chart-container">
+                <canvas id="rankChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/personnel/dashboard_stats/');
+                const data = await response.json();
+                
+                document.getElementById('totalPersonnel').textContent = data.total_personnel;
+                document.getElementById('avgReadiness').textContent = Math.round(data.avg_readiness) + '%';
+                document.getElementById('attritionRisk').textContent = data.high_attrition_risk;
+                document.getElementById('leadershipPotential').textContent = data.high_leadership_potential;
+                
+                // Unit Chart
+                new Chart(document.getElementById('unitChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(data.units),
+                        datasets: [{
+                            data: Object.values(data.units),
+                            backgroundColor: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6']
+                        }]
+                    }
+                });
+                
+                // Rank Chart
+                new Chart(document.getElementById('rankChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(data.ranks),
+                        datasets: [{
+                            data: Object.values(data.ranks),
+                            backgroundColor: '#3b82f6'
+                        }]
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+        
+        loadDashboard();
+    </script>
+</body>
+</html>
