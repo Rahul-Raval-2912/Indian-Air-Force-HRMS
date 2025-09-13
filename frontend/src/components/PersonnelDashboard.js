@@ -4,6 +4,22 @@ import ChatbotButton from './ChatbotButton';
 const PersonnelDashboard = ({ user }) => {
   const [personalData, setPersonalData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [showMedicalModal, setShowMedicalModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [leaveForm, setLeaveForm] = useState({
+    leaveType: 'Annual',
+    startDate: '',
+    endDate: '',
+    reason: ''
+  });
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [medicalForm, setMedicalForm] = useState({
+    appointmentDate: '',
+    appointmentType: 'Routine Checkup',
+    reason: ''
+  });
 
   useEffect(() => {
     fetchPersonalData();
@@ -12,7 +28,7 @@ const PersonnelDashboard = ({ user }) => {
   const fetchPersonalData = async () => {
     try {
       // In a real app, this would fetch the current user's data
-      const response = await fetch('http://localhost:8000/api/personnel/');
+      const response = await fetch('/api/personnel/');
       const data = await response.json();
       setPersonalData(data[0]); // Use first record as example
       setLoading(false);
@@ -20,7 +36,7 @@ const PersonnelDashboard = ({ user }) => {
       console.error('Error fetching personal data:', error);
       // Fallback mock data
       setPersonalData({
-        id: 1,
+        personnel_id: 'IAF001',
         name: 'Flight Lieutenant Kumar',
         rank: 'Flight Lieutenant',
         unit: 'Fighter Squadron 1',
@@ -41,6 +57,37 @@ const PersonnelDashboard = ({ user }) => {
       setLoading(false);
     }
   };
+
+  const handleApplyLeave = () => setShowLeaveModal(true);
+
+  const handleEnrollCourse = () => setShowCourseModal(true);
+  const handleScheduleMedical = () => setShowMedicalModal(true);
+  const handlePerformanceReport = () => setShowReportModal(true);
+
+  const submitLeaveApplication = () => {
+    const days = Math.ceil((new Date(leaveForm.endDate) - new Date(leaveForm.startDate)) / (1000 * 60 * 60 * 24)) + 1;
+    alert(`Leave Application Submitted!\nRequest ID: LR-${Date.now()}\nDays: ${days}\nStatus: Pending Approval`);
+    setShowLeaveModal(false);
+    setLeaveForm({ leaveType: 'Annual', startDate: '', endDate: '', reason: '' });
+  };
+
+  const enrollInCourse = (course) => {
+    alert(`Enrolled in ${course.name}!\nEnrollment ID: EN-${Date.now()}\nStatus: Confirmed`);
+    setShowCourseModal(false);
+  };
+
+  const scheduleMedicalAppointment = () => {
+    alert(`Medical Appointment Scheduled!\nDate: ${medicalForm.appointmentDate}\nType: ${medicalForm.appointmentType}\nAppointment ID: MED-${Date.now()}`);
+    setShowMedicalModal(false);
+    setMedicalForm({ appointmentDate: '', appointmentType: 'Routine Checkup', reason: '' });
+  };
+
+  const courses = [
+    { id: 1, name: 'Advanced Leadership Course', duration: '6 months', location: 'Air Force Academy' },
+    { id: 2, name: 'Cyber Security Training', duration: '3 months', location: 'Technical Center' },
+    { id: 3, name: 'Strategic Planning Workshop', duration: '2 months', location: 'Command College' },
+    { id: 4, name: 'Combat Readiness Program', duration: '4 months', location: 'Training Base' }
+  ];
 
   if (loading) {
     return (
@@ -239,7 +286,7 @@ const PersonnelDashboard = ({ user }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button 
             className="btn-primary p-4 text-left hover:transform hover:scale-105 transition-all"
-            onClick={() => alert('Leave Application Form\n\nLeave Type: Annual Leave\nStart Date: Select date\nEnd Date: Select date\nReason: Enter reason\n\nStatus: Form would open in real application')}
+            onClick={handleApplyLeave}
           >
             <div className="text-lg mb-2">📝</div>
             <div className="font-semibold">Apply for Leave</div>
@@ -248,7 +295,7 @@ const PersonnelDashboard = ({ user }) => {
           
           <button 
             className="btn-primary p-4 text-left hover:transform hover:scale-105 transition-all"
-            onClick={() => alert('Training Enrollment\n\nAvailable Courses:\n• Advanced Leadership Course\n• Cyber Security Training\n• Strategic Planning Workshop\n• Combat Readiness Program\n\nClick to enroll in selected course')}
+            onClick={handleEnrollCourse}
           >
             <div className="text-lg mb-2">📚</div>
             <div className="font-semibold">Enroll in Course</div>
@@ -257,7 +304,7 @@ const PersonnelDashboard = ({ user }) => {
           
           <button 
             className="btn-primary p-4 text-left hover:transform hover:scale-105 transition-all"
-            onClick={() => alert('Medical Appointment Booking\n\nNext Available Slots:\n• Tomorrow 10:00 AM\n• Day after 2:00 PM\n• Next week 9:00 AM\n\nAppointment Type:\n• Routine Checkup\n• Fitness Assessment\n• Specialist Consultation')}
+            onClick={handleScheduleMedical}
           >
             <div className="text-lg mb-2">🏥</div>
             <div className="font-semibold">Medical Appointment</div>
@@ -266,7 +313,7 @@ const PersonnelDashboard = ({ user }) => {
           
           <button 
             className="btn-primary p-4 text-left hover:transform hover:scale-105 transition-all"
-            onClick={() => alert('Performance Review Report\n\nOverall Rating: Excellent (4.8/5.0)\n\nStrengths:\n• Leadership skills\n• Technical expertise\n• Team collaboration\n\nAreas for Development:\n• Strategic planning\n• Advanced communication\n\nNext Review: July 2024')}
+            onClick={handlePerformanceReport}
           >
             <div className="text-lg mb-2">📊</div>
             <div className="font-semibold">Performance Review</div>
@@ -313,6 +360,216 @@ const PersonnelDashboard = ({ user }) => {
 
       {/* AI Assistant Chatbot */}
       <ChatbotButton userRole="personnel" />
+
+      {/* Leave Application Modal */}
+      {showLeaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+            <h3 className="text-xl font-bold mb-4">Apply for Leave</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Leave Type</label>
+                <select 
+                  className="w-full p-2 border rounded"
+                  value={leaveForm.leaveType}
+                  onChange={(e) => setLeaveForm({...leaveForm, leaveType: e.target.value})}
+                >
+                  <option value="Annual">Annual Leave</option>
+                  <option value="Medical">Medical Leave</option>
+                  <option value="Emergency">Emergency Leave</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Start Date</label>
+                <input 
+                  type="date" 
+                  className="w-full p-2 border rounded"
+                  value={leaveForm.startDate}
+                  onChange={(e) => setLeaveForm({...leaveForm, startDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">End Date</label>
+                <input 
+                  type="date" 
+                  className="w-full p-2 border rounded"
+                  value={leaveForm.endDate}
+                  onChange={(e) => setLeaveForm({...leaveForm, endDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Reason</label>
+                <textarea 
+                  className="w-full p-2 border rounded"
+                  rows="3"
+                  value={leaveForm.reason}
+                  onChange={(e) => setLeaveForm({...leaveForm, reason: e.target.value})}
+                  placeholder="Enter reason for leave"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button 
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowLeaveModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={submitLeaveApplication}
+                disabled={!leaveForm.startDate || !leaveForm.endDate}
+              >
+                Submit Application
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Course Enrollment Modal */}
+      {showCourseModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+            <h3 className="text-xl font-bold mb-4">Available Training Courses</h3>
+            <div className="space-y-3">
+              {courses.map(course => (
+                <div key={course.id} className="border rounded p-3 hover:bg-gray-50">
+                  <h4 className="font-semibold">{course.name}</h4>
+                  <p className="text-sm text-gray-600">Duration: {course.duration}</p>
+                  <p className="text-sm text-gray-600">Location: {course.location}</p>
+                  <button 
+                    className="mt-2 px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                    onClick={() => enrollInCourse(course)}
+                  >
+                    Enroll
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end mt-6">
+              <button 
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowCourseModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Medical Appointment Modal */}
+      {showMedicalModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+            <h3 className="text-xl font-bold mb-4">Schedule Medical Appointment</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Appointment Date</label>
+                <input 
+                  type="date" 
+                  className="w-full p-2 border rounded"
+                  value={medicalForm.appointmentDate}
+                  onChange={(e) => setMedicalForm({...medicalForm, appointmentDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Appointment Type</label>
+                <select 
+                  className="w-full p-2 border rounded"
+                  value={medicalForm.appointmentType}
+                  onChange={(e) => setMedicalForm({...medicalForm, appointmentType: e.target.value})}
+                >
+                  <option value="Routine Checkup">Routine Checkup</option>
+                  <option value="Fitness Assessment">Fitness Assessment</option>
+                  <option value="Specialist Consultation">Specialist Consultation</option>
+                  <option value="Emergency">Emergency</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Reason/Symptoms</label>
+                <textarea 
+                  className="w-full p-2 border rounded"
+                  rows="3"
+                  value={medicalForm.reason}
+                  onChange={(e) => setMedicalForm({...medicalForm, reason: e.target.value})}
+                  placeholder="Describe symptoms or reason for appointment"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 mt-6">
+              <button 
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowMedicalModal(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                onClick={scheduleMedicalAppointment}
+                disabled={!medicalForm.appointmentDate}
+              >
+                Schedule Appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Performance Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md max-h-96 overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">Performance Review Report</h3>
+            <div className="space-y-4">
+              <div className="bg-green-50 p-3 rounded">
+                <h4 className="font-semibold text-green-800">Overall Rating</h4>
+                <p className="text-2xl font-bold text-green-600">4.8/5.0 (Excellent)</p>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-2">Strengths</h4>
+                <ul className="text-sm space-y-1">
+                  <li>• Leadership skills (4.9/5.0)</li>
+                  <li>• Technical expertise (4.8/5.0)</li>
+                  <li>• Team collaboration (4.7/5.0)</li>
+                  <li>• Mission readiness (4.9/5.0)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-2">Areas for Development</h4>
+                <ul className="text-sm space-y-1">
+                  <li>• Strategic planning (4.2/5.0)</li>
+                  <li>• Advanced communication (4.3/5.0)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-semibold mb-2">Career Recommendations</h4>
+                <ul className="text-sm space-y-1">
+                  <li>• Leadership development program</li>
+                  <li>• Strategic planning course</li>
+                  <li>• Consider Squadron Leader role</li>
+                </ul>
+              </div>
+              
+              <div className="bg-blue-50 p-3 rounded">
+                <p className="text-sm"><strong>Next Review:</strong> July 2024</p>
+              </div>
+            </div>
+            <div className="flex justify-end mt-6">
+              <button 
+                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                onClick={() => setShowReportModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

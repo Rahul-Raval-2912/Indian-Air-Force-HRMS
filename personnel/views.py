@@ -8,12 +8,21 @@ import json
 
 from .models import (
     Personnel, HRRecord, MedicalRecord, TrainingRecord, 
-    MissionRecord, Equipment, MaintenanceRecord, LeaveRequest
+    MissionRecord, Equipment, MaintenanceRecord, LeaveRequest,
+    AirBase, Aircraft, Squadron, SignupRequest
 )
 from .serializers import (
     PersonnelSerializer, HRRecordSerializer, MedicalRecordSerializer,
     TrainingRecordSerializer, MissionRecordSerializer, EquipmentSerializer
 )
+
+# Create missing serializer
+from rest_framework import serializers
+
+class SignupRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SignupRequest
+        fields = '__all__'
 
 class PersonnelViewSet(viewsets.ModelViewSet):
     queryset = Personnel.objects.all()
@@ -34,6 +43,18 @@ class PersonnelViewSet(viewsets.ModelViewSet):
         # Unit distribution
         unit_distribution = Personnel.objects.values('unit').annotate(count=Count('unit'))
         
+        # Base distribution
+        base_distribution = Personnel.objects.values('base_location').annotate(count=Count('personnel_id'))
+        
+        # Aircraft statistics
+        total_aircraft = Aircraft.objects.count()
+        operational_aircraft = Aircraft.objects.filter(status='Operational').count()
+        aircraft_with_pilots = Aircraft.objects.filter(pilot_assigned__isnull=False).count()
+        
+        # Air base statistics
+        total_bases = AirBase.objects.count()
+        operational_bases = AirBase.objects.filter(status='Operational').count()
+        
         # Performance metrics
         avg_performance = Personnel.objects.aggregate(
             avg_performance=Avg('performance_score'),
@@ -49,6 +70,18 @@ class PersonnelViewSet(viewsets.ModelViewSet):
             'deployed': deployed,
             'rank_distribution': list(rank_distribution),
             'unit_distribution': list(unit_distribution),
+            'base_distribution': list(base_distribution),
+            'aircraft_stats': {
+                'total_aircraft': total_aircraft,
+                'operational_aircraft': operational_aircraft,
+                'aircraft_with_pilots': aircraft_with_pilots,
+                'aircraft_readiness': round((operational_aircraft / total_aircraft) * 100, 1) if total_aircraft > 0 else 0
+            },
+            'base_stats': {
+                'total_bases': total_bases,
+                'operational_bases': operational_bases,
+                'base_readiness': round((operational_bases / total_bases) * 100, 1) if total_bases > 0 else 0
+            },
             'performance_metrics': avg_performance,
             'readiness_percentage': round((active_personnel / total_personnel) * 100, 1) if total_personnel > 0 else 0
         })
@@ -322,6 +355,236 @@ class PersonnelViewSet(viewsets.ModelViewSet):
             response = chatbot.process_query(query, personnel_data, system_data)
             
             return Response(response)
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['post'])
+    def apply_leave(self, request):
+        """Submit leave application"""
+        try:
+            data = request.data
+            personnel_id = data.get('personnel_id')
+            
+            if not personnel_id:
+                return Response({'error': 'Personnel ID required'}, status=400)
+            
+            personnel = Personnel.objects.get(personnel_id=personnel_id)
+            
+            # Calculate days
+            from datetime import datetime
+            start_date = datetime.strptime(data.get('start_date'), '%Y-%m-%d').date()
+            end_date = datetime.strptime(data.get('end_date'), '%Y-%m-%d').date()
+            days_requested = (end_date - start_date).days + 1
+            
+            leave_request = LeaveRequest.objects.create(
+                personnel=personnel,
+                leave_type=data.get('leave_type'),
+                start_date=start_date,
+                end_date=end_date,
+                days_requested=days_requested,
+                reason=data.get('reason'),
+                status='Pending'
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'Leave application submitted successfully',
+                'request_id': leave_request.id,
+                'days_requested': days_requested,
+                'status': 'Pending Approval'
+            })
+            
+        except Personnel.DoesNotExist:
+            return Response({'error': 'Personnel not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['get'])
+    def training_courses(self, request):
+        """Get available training courses"""
+        try:
+            # Mock training courses data
+            courses = [
+                {
+                    'id': 1,
+                    'name': 'Advanced Fighter Pilot Training',
+                    'duration': '6 months',
+                    'location': 'Air Force Academy',
+                    'prerequisites': 'Basic Pilot License',
+                    'available_slots': 15,
+                    'start_date': '2024-03-01'
+                },
+                {
+                    'id': 2,
+                    'name': 'Aircraft Maintenance Certification',
+                    'duration': '3 months',
+                    'location': 'Technical Training Center',
+                    'prerequisites': 'Engineering Background',
+                    'available_slots': 25,
+                    'start_date': '2024-02-15'
+                },
+                {
+                    'id': 3,
+                    'name': 'Leadership Development Program',
+                    'duration': '2 months',
+                    'location': 'Command College',
+                    'prerequisites': 'Squadron Leader or above',
+                    'available_slots': 20,
+                    'start_date': '2024-04-01'
+                },
+                {
+                    'id': 4,
+                    'name': 'Cyber Security Operations',
+                    'duration': '4 months',
+                    'location': 'Cyber Command Center',
+                    'prerequisites': 'IT Background',
+                    'available_slots': 12,
+                    'start_date': '2024-03-15'
+                }
+            ]
+            
+            return Response({
+                'courses': courses,
+                'total_courses': len(courses)
+            })
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['post'])
+    def enroll_course(self, request):
+        """Enroll in training course"""
+        try:
+            data = request.data
+            personnel_id = data.get('personnel_id')
+            course_id = data.get('course_id')
+            
+            if not personnel_id or not course_id:
+                return Response({'error': 'Personnel ID and Course ID required'}, status=400)
+            
+            personnel = Personnel.objects.get(personnel_id=personnel_id)
+            
+            # Create training record
+            training_record = TrainingRecord.objects.create(
+                personnel=personnel,
+                course_name=data.get('course_name'),
+                course_type='Professional Development',
+                start_date=datetime.strptime(data.get('start_date'), '%Y-%m-%d').date(),
+                end_date=datetime.strptime(data.get('end_date'), '%Y-%m-%d').date(),
+                status='Scheduled',
+                instructor='TBD',
+                location=data.get('location')
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'Successfully enrolled in course',
+                'enrollment_id': training_record.id,
+                'course_name': data.get('course_name'),
+                'status': 'Enrolled'
+            })
+            
+        except Personnel.DoesNotExist:
+            return Response({'error': 'Personnel not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['post'])
+    def schedule_medical(self, request):
+        """Schedule medical appointment"""
+        try:
+            data = request.data
+            personnel_id = data.get('personnel_id')
+            
+            if not personnel_id:
+                return Response({'error': 'Personnel ID required'}, status=400)
+            
+            personnel = Personnel.objects.get(personnel_id=personnel_id)
+            
+            # Create medical record for appointment
+            appointment_date = datetime.strptime(data.get('appointment_date'), '%Y-%m-%d').date()
+            
+            medical_record = MedicalRecord.objects.create(
+                personnel=personnel,
+                checkup_date=appointment_date,
+                medical_status='Under Review',
+                height=0,  # Will be filled during checkup
+                weight=0,
+                blood_pressure='TBD',
+                heart_rate=0,
+                vision_status='TBD',
+                hearing_status='TBD',
+                fitness_level='TBD',
+                medical_notes=f"Scheduled appointment - {data.get('reason', 'Routine checkup')}",
+                next_checkup=appointment_date + timedelta(days=180)
+            )
+            
+            return Response({
+                'success': True,
+                'message': 'Medical appointment scheduled successfully',
+                'appointment_id': medical_record.id,
+                'appointment_date': appointment_date.strftime('%Y-%m-%d'),
+                'status': 'Scheduled'
+            })
+            
+        except Personnel.DoesNotExist:
+            return Response({'error': 'Personnel not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=True, methods=['get'])
+    def performance_report(self, request, pk=None):
+        """Get detailed performance report"""
+        try:
+            personnel = self.get_object()
+            
+            # Get performance reviews
+            reviews = PerformanceReview.objects.filter(personnel=personnel).order_by('-review_date')
+            
+            # Get training records
+            training = TrainingRecord.objects.filter(personnel=personnel).order_by('-end_date')
+            
+            # Calculate performance trends
+            performance_trend = []
+            for review in reviews[:6]:  # Last 6 reviews
+                performance_trend.append({
+                    'date': review.review_date.strftime('%Y-%m'),
+                    'overall_rating': review.overall_rating,
+                    'leadership_rating': review.leadership_rating,
+                    'technical_rating': review.technical_rating
+                })
+            
+            # AI-powered insights
+            insights = {
+                'strengths': ['Leadership skills', 'Technical expertise', 'Team collaboration'],
+                'improvement_areas': ['Time management', 'Strategic thinking'],
+                'career_recommendations': ['Consider leadership training', 'Pursue advanced certification'],
+                'predicted_promotion_timeline': '18-24 months'
+            }
+            
+            return Response({
+                'personnel_info': {
+                    'name': personnel.name,
+                    'rank': personnel.rank,
+                    'unit': personnel.unit,
+                    'years_of_service': personnel.years_of_service
+                },
+                'current_scores': {
+                    'performance_score': personnel.performance_score,
+                    'leadership_score': personnel.leadership_score,
+                    'technical_score': personnel.technical_score,
+                    'readiness_score': personnel.readiness_score
+                },
+                'performance_trend': performance_trend,
+                'recent_training': [{
+                    'course_name': t.course_name,
+                    'completion_date': t.end_date.strftime('%Y-%m-%d') if t.end_date else 'In Progress',
+                    'score': t.score or 'Pending'
+                } for t in training[:5]],
+                'ai_insights': insights,
+                'last_updated': timezone.now().isoformat()
+            })
             
         except Exception as e:
             return Response({'error': str(e)}, status=500)

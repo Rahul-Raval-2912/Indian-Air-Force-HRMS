@@ -307,3 +307,89 @@ class Deployment(models.Model):
     
     def __str__(self):
         return f"{self.personnel.name} - {self.deployment_name}"
+
+class AirBase(models.Model):
+    BASE_TYPE_CHOICES = [
+        ('Fighter', 'Fighter Base'),
+        ('Transport', 'Transport Base'),
+        ('Training', 'Training Base'),
+        ('Helicopter', 'Helicopter Base'),
+        ('Strategic', 'Strategic Base'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('Operational', 'Operational'),
+        ('Maintenance', 'Under Maintenance'),
+        ('Standby', 'Standby'),
+        ('Decommissioned', 'Decommissioned'),
+    ]
+    
+    base_id = models.CharField(max_length=20, unique=True, primary_key=True)
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100)
+    state = models.CharField(max_length=50)
+    base_type = models.CharField(max_length=20, choices=BASE_TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Operational')
+    established_date = models.DateField()
+    runway_count = models.IntegerField(default=1)
+    hangar_capacity = models.IntegerField()
+    personnel_capacity = models.IntegerField()
+    current_personnel = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.name} ({self.base_id})"
+
+class Aircraft(models.Model):
+    AIRCRAFT_TYPE_CHOICES = [
+        ('Fighter', 'Fighter Aircraft'),
+        ('Transport', 'Transport Aircraft'),
+        ('Helicopter', 'Helicopter'),
+        ('Trainer', 'Training Aircraft'),
+        ('Reconnaissance', 'Reconnaissance Aircraft'),
+        ('Tanker', 'Air-to-Air Refueling'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('Operational', 'Operational'),
+        ('Maintenance', 'Under Maintenance'),
+        ('Repair', 'Under Repair'),
+        ('Grounded', 'Grounded'),
+        ('Decommissioned', 'Decommissioned'),
+    ]
+    
+    aircraft_id = models.CharField(max_length=20, unique=True, primary_key=True)
+    model = models.CharField(max_length=100)
+    aircraft_type = models.CharField(max_length=20, choices=AIRCRAFT_TYPE_CHOICES)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Operational')
+    base = models.ForeignKey(AirBase, on_delete=models.CASCADE, related_name='aircraft')
+    squadron = models.CharField(max_length=100)
+    manufactured_date = models.DateField()
+    last_maintenance = models.DateField()
+    next_maintenance = models.DateField()
+    flight_hours = models.IntegerField(default=0)
+    pilot_assigned = models.ForeignKey(Personnel, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_aircraft')
+    crew_required = models.IntegerField(default=1)
+    
+    def __str__(self):
+        return f"{self.model} ({self.aircraft_id})"
+
+class Squadron(models.Model):
+    SQUADRON_TYPE_CHOICES = [
+        ('Fighter', 'Fighter Squadron'),
+        ('Transport', 'Transport Squadron'),
+        ('Helicopter', 'Helicopter Squadron'),
+        ('Training', 'Training Squadron'),
+        ('Special Ops', 'Special Operations'),
+    ]
+    
+    squadron_id = models.CharField(max_length=20, unique=True, primary_key=True)
+    name = models.CharField(max_length=100)
+    squadron_type = models.CharField(max_length=20, choices=SQUADRON_TYPE_CHOICES)
+    base = models.ForeignKey(AirBase, on_delete=models.CASCADE, related_name='squadrons')
+    commander = models.ForeignKey(Personnel, on_delete=models.SET_NULL, null=True, related_name='commanded_squadron')
+    aircraft_count = models.IntegerField(default=0)
+    personnel_count = models.IntegerField(default=0)
+    established_date = models.DateField()
+    
+    def __str__(self):
+        return f"{self.name} ({self.squadron_id})"
