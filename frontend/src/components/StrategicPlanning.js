@@ -136,41 +136,6 @@ const StrategicPlanning = ({ userRole }) => {
       });
     }
 
-    // Knowledge transfer - always critical for retirements
-    recommendations.push({
-      title: `Implement knowledge transfer for ${actualRetirements} retiring personnel`,
-      details: {
-        timeline: age > 55 ? '1-2 months' : '2-4 months',
-        resources: 'Training Command, Senior Officers',
-        steps: [
-          'Create mentorship programs',
-          'Document critical procedures',
-          'Establish cross-training initiatives',
-          'Record expertise from retiring personnel'
-        ],
-        kpis: ['Knowledge retention rate', 'Training completion', 'Skill transfer success']
-      }
-    });
-
-    // Unit-specific recommendations
-    const mostImpactedUnit = Object.entries(impactByUnit).sort((a, b) => b[1] - a[1])[0];
-    if (mostImpactedUnit && mostImpactedUnit[1] > 5) {
-      recommendations.push({
-        title: `Priority focus on ${mostImpactedUnit[0]} - ${mostImpactedUnit[1]} retirements`,
-        details: {
-          timeline: '1-3 months',
-          resources: 'Unit Commander, HR Analytics',
-          steps: [
-            'Assess critical skill gaps in unit',
-            'Identify internal transfer candidates',
-            'Plan specialized recruitment',
-            'Implement retention strategies'
-          ],
-          kpis: ['Unit readiness score', 'Skill gap closure', 'Retention improvement']
-        }
-      });
-    }
-
     return {
       type: 'Mass Retirement Analysis',
       totalEligible: eligibleForRetirement.length,
@@ -198,7 +163,6 @@ const StrategicPlanning = ({ userRole }) => {
     const impactLevel = personnelToMove / sourcePersonnel.length;
     const recommendations = [];
 
-    // Skills assessment - always needed
     recommendations.push({
       title: `Assess ${personnelToMove} personnel for ${fromUnit} to ${toUnit} transfer`,
       details: {
@@ -213,59 +177,6 @@ const StrategicPlanning = ({ userRole }) => {
         kpis: ['Skill match percentage', 'Assessment completion rate', 'Readiness score']
       }
     });
-
-    // Training based on skill gaps
-    const criticalSkills = Object.entries(skillImpact).filter(([, count]) => count > 2);
-    if (criticalSkills.length > 0) {
-      recommendations.push({
-        title: `Specialized training for ${criticalSkills.map(([skill]) => skill).join(', ')} roles`,
-        details: {
-          timeline: '2-4 weeks',
-          resources: 'Training Command, Subject Matter Experts',
-          steps: [
-            `Design ${toUnit}-specific training modules`,
-            'Schedule intensive skill workshops',
-            'Arrange equipment familiarization',
-            'Conduct operational simulations'
-          ],
-          kpis: ['Training completion rate', 'Competency improvement', 'Operational readiness']
-        }
-      });
-    }
-
-    // Communication protocols
-    recommendations.push({
-      title: `Establish ${fromUnit}-${toUnit} transition communication`,
-      details: {
-        timeline: '1 week',
-        resources: 'Communications Team, Unit Leaders',
-        steps: [
-          'Set up secure communication channels',
-          'Brief personnel on new command structure',
-          'Establish transition timeline',
-          'Create feedback and support systems'
-        ],
-        kpis: ['Communication clarity', 'Transition smoothness', 'Personnel satisfaction']
-      }
-    });
-
-    // Risk mitigation for high impact transfers
-    if (impactLevel > 0.4) {
-      recommendations.push({
-        title: `High-impact transfer mitigation for ${fromUnit}`,
-        details: {
-          timeline: '1-2 weeks',
-          resources: 'Strategic Planning, Unit Commanders',
-          steps: [
-            'Identify critical functions at risk',
-            'Plan temporary personnel backfill',
-            'Accelerate replacement recruitment',
-            'Implement knowledge transfer protocols'
-          ],
-          kpis: ['Operational continuity', 'Mission readiness', 'Risk reduction']
-        }
-      });
-    }
 
     return {
       type: 'Unit Redeployment Analysis',
@@ -294,93 +205,9 @@ const StrategicPlanning = ({ userRole }) => {
       within48h: Math.floor(personnelData.length * 0.95)
     };
 
-    const unitReadiness = {};
-    personnelData.forEach(person => {
-      if (!unitReadiness[person.unit]) {
-        unitReadiness[person.unit] = { total: 0, ready: 0 };
-      }
-      unitReadiness[person.unit].total++;
-      if (person.readiness_score >= readinessLevel) {
-        unitReadiness[person.unit].ready++;
-      }
-    });
-
     const overallReadinessPercent = (readyPersonnel.length / personnelData.length) * 100;
-    const criticalGaps = Object.entries(unitReadiness).filter(([, data]) => (data.ready / data.total) < 0.8);
-    const subThresholdPersonnel = personnelData.length - readyPersonnel.length;
-    
     const recommendations = [];
 
-    // Reserve activation based on readiness gap
-    if (overallReadinessPercent < 80) {
-      recommendations.push({
-        title: `Emergency reserve activation - ${Math.ceil(subThresholdPersonnel * 0.5)} personnel needed`,
-        details: {
-          timeline: timeframe <= 12 ? '4-8 hours' : '6-12 hours',
-          resources: 'Reserve Command, Emergency Communications',
-          steps: [
-            'Issue immediate activation orders',
-            'Deploy emergency transport',
-            'Conduct rapid integration protocols',
-            'Establish emergency command structure'
-          ],
-          kpis: ['Activation response time', 'Reserve integration rate', 'Readiness improvement']
-        }
-      });
-    } else {
-      recommendations.push({
-        title: `Selective reserve activation - ${Math.ceil(subThresholdPersonnel * 0.2)} personnel`,
-        details: {
-          timeline: '6-12 hours',
-          resources: 'Reserve Command, Communications',
-          steps: [
-            'Activate specialized reserve units',
-            'Coordinate targeted transportation',
-            'Conduct readiness assessments',
-            'Integrate with active units'
-          ],
-          kpis: ['Targeted activation success', 'Readiness enhancement', 'Integration efficiency']
-        }
-      });
-    }
-
-    // Training for sub-threshold personnel
-    if (subThresholdPersonnel > 0) {
-      recommendations.push({
-        title: `Rapid training for ${subThresholdPersonnel} sub-threshold personnel`,
-        details: {
-          timeline: timeframe <= 24 ? '12-18 hours' : '24-48 hours',
-          resources: 'Training Command, Mobile Units, Simulators',
-          steps: [
-            'Deploy mobile training units',
-            'Conduct intensive skill refreshers',
-            'Use simulation-based rapid training',
-            'Focus on critical operational skills'
-          ],
-          kpis: ['Training completion rate', 'Readiness score improvement', 'Operational capability']
-        }
-      });
-    }
-
-    // Critical unit support
-    if (criticalGaps.length > 0) {
-      recommendations.push({
-        title: `Priority support for ${criticalGaps.length} critical units: ${criticalGaps.map(([unit]) => unit).join(', ')}`,
-        details: {
-          timeline: timeframe <= 12 ? '6-12 hours' : '12-24 hours',
-          resources: 'Logistics Command, Strategic Reserve',
-          steps: [
-            'Reallocate personnel to critical units',
-            'Deploy emergency equipment',
-            'Establish priority supply chains',
-            'Implement emergency protocols'
-          ],
-          kpis: ['Critical unit readiness', 'Resource allocation speed', 'Operational continuity']
-        }
-      });
-    }
-
-    // Emergency protocols
     recommendations.push({
       title: `Activate ${timeframe}-hour emergency mobilization protocols`,
       details: {
@@ -401,13 +228,6 @@ const StrategicPlanning = ({ userRole }) => {
       timeframe: `${timeframe} hours`,
       readinessThreshold: `${readinessLevel}%`,
       mobilizationCapacity,
-      unitReadiness: Object.entries(unitReadiness).map(([unit, data]) => ({
-        unit,
-        readyPersonnel: data.ready,
-        totalPersonnel: data.total,
-        readinessPercentage: ((data.ready / data.total) * 100).toFixed(1)
-      })),
-      criticalGaps: criticalGaps.map(([unit]) => unit),
       recommendations,
       overallReadiness: overallReadinessPercent.toFixed(1)
     };
@@ -420,26 +240,48 @@ const StrategicPlanning = ({ userRole }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Strategic Scenario Planning</h1>
-          <p className="text-gray-600">AI-powered what-if analysis for strategic decision making</p>
+    <div className="strategic-planning">
+      <div className="strategic-header">
+        <div className="header-content">
+          <h1>रणनीतिक योजना केंद्र</h1>
+          <h2>Strategic Scenario Planning Center</h2>
+          <p>AI-powered what-if analysis for strategic decision making</p>
         </div>
+        <div className="iaf-emblem">
+          <img 
+            src="https://upload.wikimedia.org/wikipedia/commons/5/55/Indian_Air_Force_Logo.svg" 
+            alt="Indian Air Force" 
+            className="emblem-image"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.nextSibling.style.display = 'flex';
+            }}
+          />
+          <div className="emblem-fallback" style={{display: 'none'}}>
+            <img 
+              src="/images/indian-air-force-day-air-force-day-indian-air-force-day-wallpaper-free-vector.jpg" 
+              alt="Indian Air Force" 
+              className="fallback-image"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentNode.innerHTML = '<span>✈️</span>';
+              }}
+            />
+          </div>
+        </div>
+      </div>
 
-        {/* Scenario Selection */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="strategic-content">
+        <div className="scenarios-grid">
           {scenarios.map((scenario) => (
             <button
               key={scenario.id}
               onClick={() => setActiveScenario(scenario.id)}
-              className={`card p-6 text-left transition-all hover:transform hover:scale-105 ${
-                activeScenario === scenario.id ? 'ring-2 ring-blue-500' : ''
-              }`}
+              className={`scenario-card ${activeScenario === scenario.id ? 'active' : ''}`}
             >
-              <div className="text-3xl mb-3">{scenario.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{scenario.name}</h3>
-              <p className="text-sm text-gray-600">
+              <div className="scenario-icon">{scenario.icon}</div>
+              <h3>{scenario.name}</h3>
+              <p>
                 {scenario.id === 'retirement' && 'Analyze impact of mass retirements'}
                 {scenario.id === 'redeployment' && 'Simulate personnel reallocation'}
                 {scenario.id === 'mobilization' && 'Assess emergency response capability'}
@@ -448,17 +290,14 @@ const StrategicPlanning = ({ userRole }) => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Parameters Panel */}
-          <div className="card p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Simulation Parameters</h3>
+        <div className="planning-grid">
+          <div className="parameters-panel">
+            <h3>Simulation Parameters</h3>
             
             {activeScenario === 'retirement' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Retirement Age Threshold
-                  </label>
+              <div className="parameter-group">
+                <div className="input-group">
+                  <label>Retirement Age Threshold</label>
                   <input
                     type="number"
                     value={parameters.retirement.age}
@@ -466,15 +305,13 @@ const StrategicPlanning = ({ userRole }) => {
                       ...prev,
                       retirement: { ...prev.retirement, age: parseInt(e.target.value) }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                     min="50"
                     max="65"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Expected Retirement Rate (%)
-                  </label>
+                <div className="input-group">
+                  <label>Expected Retirement Rate (%)</label>
                   <input
                     type="number"
                     value={parameters.retirement.percentage}
@@ -482,7 +319,7 @@ const StrategicPlanning = ({ userRole }) => {
                       ...prev,
                       retirement: { ...prev.retirement, percentage: parseInt(e.target.value) }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                     min="5"
                     max="50"
                   />
@@ -491,18 +328,16 @@ const StrategicPlanning = ({ userRole }) => {
             )}
 
             {activeScenario === 'redeployment' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    From Unit
-                  </label>
+              <div className="parameter-group">
+                <div className="input-group">
+                  <label>From Unit</label>
                   <select
                     value={parameters.redeployment.fromUnit}
                     onChange={(e) => setParameters(prev => ({
                       ...prev,
                       redeployment: { ...prev.redeployment, fromUnit: e.target.value }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                   >
                     <option value="">Select Unit</option>
                     <option value="Fighter Squadron 1">Fighter Squadron 1</option>
@@ -511,17 +346,15 @@ const StrategicPlanning = ({ userRole }) => {
                     <option value="Training Command">Training Command</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    To Unit
-                  </label>
+                <div className="input-group">
+                  <label>To Unit</label>
                   <select
                     value={parameters.redeployment.toUnit}
                     onChange={(e) => setParameters(prev => ({
                       ...prev,
                       redeployment: { ...prev.redeployment, toUnit: e.target.value }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                   >
                     <option value="">Select Unit</option>
                     <option value="Fighter Squadron 2">Fighter Squadron 2</option>
@@ -530,10 +363,8 @@ const StrategicPlanning = ({ userRole }) => {
                     <option value="Logistics Command">Logistics Command</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Personnel to Move (%)
-                  </label>
+                <div className="input-group">
+                  <label>Personnel to Move (%)</label>
                   <input
                     type="number"
                     value={parameters.redeployment.percentage}
@@ -541,7 +372,7 @@ const StrategicPlanning = ({ userRole }) => {
                       ...prev,
                       redeployment: { ...prev.redeployment, percentage: parseInt(e.target.value) }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                     min="5"
                     max="50"
                   />
@@ -550,11 +381,9 @@ const StrategicPlanning = ({ userRole }) => {
             )}
 
             {activeScenario === 'mobilization' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mobilization Timeframe (hours)
-                  </label>
+              <div className="parameter-group">
+                <div className="input-group">
+                  <label>Mobilization Timeframe (hours)</label>
                   <input
                     type="number"
                     value={parameters.mobilization.timeframe}
@@ -562,15 +391,13 @@ const StrategicPlanning = ({ userRole }) => {
                       ...prev,
                       mobilization: { ...prev.mobilization, timeframe: parseInt(e.target.value) }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                     min="6"
                     max="72"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Minimum Readiness Level (%)
-                  </label>
+                <div className="input-group">
+                  <label>Minimum Readiness Level (%)</label>
                   <input
                     type="number"
                     value={parameters.mobilization.readinessLevel}
@@ -578,7 +405,7 @@ const StrategicPlanning = ({ userRole }) => {
                       ...prev,
                       mobilization: { ...prev.mobilization, readinessLevel: parseInt(e.target.value) }
                     }))}
-                    className="form-input"
+                    className="iaf-input"
                     min="70"
                     max="100"
                   />
@@ -589,146 +416,153 @@ const StrategicPlanning = ({ userRole }) => {
             <button
               onClick={() => runSimulation(activeScenario)}
               disabled={isRunning}
-              className="btn-primary w-full mt-6"
+              className="run-simulation-btn"
             >
-              {isRunning ? 'Running Simulation...' : 'Run Simulation'}
+              {isRunning ? (
+                <>
+                  <div className="loading-spinner-small"></div>
+                  <span>Running Simulation...</span>
+                </>
+              ) : (
+                <>
+                  <span>🚀</span>
+                  <span>Run Simulation</span>
+                </>
+              )}
             </button>
           </div>
 
-          {/* Results Panel */}
-          <div className="lg:col-span-2">
+          <div className="results-panel">
             {isRunning && (
-              <div className="card p-8 text-center">
-                <div className="loading-spinner mx-auto mb-4"></div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Running AI Simulation</h3>
-                <p className="text-gray-600">Analyzing personnel data and generating strategic insights...</p>
+              <div className="simulation-loading">
+                <div className="loading-spinner"></div>
+                <h3>Running AI Simulation</h3>
+                <p>Analyzing personnel data and generating strategic insights...</p>
               </div>
             )}
 
             {simulationResults && (
-              <div className="card p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold text-gray-900">{simulationResults.type}</h3>
-                  <span className={`badge ${
-                    simulationResults.riskLevel === 'High' ? 'badge-danger' :
-                    simulationResults.riskLevel === 'Medium' ? 'badge-warning' : 'badge-success'
+              <div className="results-card">
+                <div className="results-header">
+                  <h3>{simulationResults.type}</h3>
+                  <span className={`risk-badge ${
+                    simulationResults.riskLevel === 'High' ? 'high-risk' :
+                    simulationResults.riskLevel === 'Medium' ? 'medium-risk' : 'low-risk'
                   }`}>
                     {simulationResults.riskLevel} Risk
                   </span>
                 </div>
 
-                {/* Key Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="metrics-grid">
                   {activeScenario === 'retirement' && (
                     <>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">{simulationResults.totalEligible || 0}</div>
-                        <div className="text-sm text-blue-800">Eligible for Retirement</div>
+                      <div className="metric-card blue">
+                        <div className="metric-value">{simulationResults.totalEligible || 0}</div>
+                        <div className="metric-label">Eligible for Retirement</div>
                       </div>
-                      <div className="text-center p-4 bg-red-50 rounded-lg">
-                        <div className="text-2xl font-bold text-red-600">{simulationResults.projectedRetirements || 0}</div>
-                        <div className="text-sm text-red-800">Projected Retirements</div>
+                      <div className="metric-card red">
+                        <div className="metric-value">{simulationResults.projectedRetirements || 0}</div>
+                        <div className="metric-label">Projected Retirements</div>
                       </div>
-                      <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                        <div className="text-2xl font-bold text-yellow-600">{simulationResults.percentageImpact || 0}%</div>
-                        <div className="text-sm text-yellow-800">Force Impact</div>
+                      <div className="metric-card yellow">
+                        <div className="metric-value">{simulationResults.percentageImpact || 0}%</div>
+                        <div className="metric-label">Force Impact</div>
                       </div>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">{simulationResults.timeline || 'N/A'}</div>
-                        <div className="text-sm text-green-800">Recovery Timeline</div>
+                      <div className="metric-card green">
+                        <div className="metric-value">{simulationResults.timeline || 'N/A'}</div>
+                        <div className="metric-label">Recovery Timeline</div>
                       </div>
                     </>
                   )}
 
                   {activeScenario === 'redeployment' && (
                     <>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">{simulationResults.personnelToMove || 0}</div>
-                        <div className="text-sm text-blue-800">Personnel Moving</div>
+                      <div className="metric-card blue">
+                        <div className="metric-value">{simulationResults.personnelToMove || 0}</div>
+                        <div className="metric-label">Personnel Moving</div>
                       </div>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">{simulationResults.sourceUnitRemaining || 0}</div>
-                        <div className="text-sm text-green-800">Remaining in Source</div>
+                      <div className="metric-card green">
+                        <div className="metric-value">{simulationResults.sourceUnitRemaining || 0}</div>
+                        <div className="metric-label">Remaining in Source</div>
                       </div>
-                      <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                        <div className="text-2xl font-bold text-yellow-600">{simulationResults.operationalImpact?.sourceUnit || 'N/A'}</div>
-                        <div className="text-sm text-yellow-800">Source Impact</div>
+                      <div className="metric-card yellow">
+                        <div className="metric-value">{simulationResults.operationalImpact?.sourceUnit || 'N/A'}</div>
+                        <div className="metric-label">Source Impact</div>
                       </div>
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">{simulationResults.timeline || 'N/A'}</div>
-                        <div className="text-sm text-purple-800">Transition Timeline</div>
+                      <div className="metric-card purple">
+                        <div className="metric-value">{simulationResults.timeline || 'N/A'}</div>
+                        <div className="metric-label">Transition Timeline</div>
                       </div>
                     </>
                   )}
 
                   {activeScenario === 'mobilization' && (
                     <>
-                      <div className="text-center p-4 bg-green-50 rounded-lg">
-                        <div className="text-2xl font-bold text-green-600">{simulationResults.overallReadiness}%</div>
-                        <div className="text-sm text-green-800">Overall Readiness</div>
+                      <div className="metric-card green">
+                        <div className="metric-value">{simulationResults.overallReadiness}%</div>
+                        <div className="metric-label">Overall Readiness</div>
                       </div>
-                      <div className="text-center p-4 bg-blue-50 rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">{simulationResults.mobilizationCapacity?.immediate || 0}</div>
-                        <div className="text-sm text-blue-800">Immediate Ready</div>
+                      <div className="metric-card blue">
+                        <div className="metric-value">{simulationResults.mobilizationCapacity?.immediate || 0}</div>
+                        <div className="metric-label">Immediate Ready</div>
                       </div>
-                      <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                        <div className="text-2xl font-bold text-yellow-600">{simulationResults.mobilizationCapacity?.within24h || 0}</div>
-                        <div className="text-sm text-yellow-800">Ready in 24h</div>
+                      <div className="metric-card yellow">
+                        <div className="metric-value">{simulationResults.mobilizationCapacity?.within24h || 0}</div>
+                        <div className="metric-label">Ready in 24h</div>
                       </div>
-                      <div className="text-center p-4 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">{simulationResults.timeframe || 'N/A'}</div>
-                        <div className="text-sm text-purple-800">Mobilization Window</div>
+                      <div className="metric-card purple">
+                        <div className="metric-value">{simulationResults.timeframe || 'N/A'}</div>
+                        <div className="metric-label">Mobilization Window</div>
                       </div>
                     </>
                   )}
                 </div>
 
-                {/* Recommendations */}
-                <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">AI Recommendations</h4>
-                  <div className="space-y-3">
+                <div className="recommendations-section">
+                  <h4>AI Recommendations</h4>
+                  <div className="recommendations-list">
                     {simulationResults.recommendations.map((rec, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg">
+                      <div key={index} className="recommendation-item">
                         <button
                           onClick={() => setExpandedRecommendation(expandedRecommendation === index ? null : index)}
-                          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors"
+                          className="recommendation-header"
                         >
-                          <div className="flex items-center">
-                            <span className="text-blue-500 mr-3">•</span>
-                            <span className="text-gray-800 font-medium">{rec.title}</span>
+                          <div className="recommendation-title">
+                            <span className="bullet">•</span>
+                            <span>{rec.title}</span>
                           </div>
-                          <span className="text-gray-400">
+                          <span className="expand-icon">
                             {expandedRecommendation === index ? '−' : '+'}
                           </span>
                         </button>
                         
                         {expandedRecommendation === index && (
-                          <div className="px-4 pb-4 border-t border-gray-100">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                              <div>
-                                <h6 className="font-semibold text-gray-900 mb-2">Timeline</h6>
-                                <p className="text-sm text-gray-600 mb-3">{rec.details.timeline}</p>
+                          <div className="recommendation-details">
+                            <div className="details-grid">
+                              <div className="detail-section">
+                                <h6>Timeline</h6>
+                                <p>{rec.details.timeline}</p>
                                 
-                                <h6 className="font-semibold text-gray-900 mb-2">Resources Required</h6>
-                                <p className="text-sm text-gray-600">{rec.details.resources}</p>
+                                <h6>Resources Required</h6>
+                                <p>{rec.details.resources}</p>
                               </div>
                               
-                              <div>
-                                <h6 className="font-semibold text-gray-900 mb-2">Action Steps</h6>
-                                <ul className="text-sm text-gray-600 space-y-1 mb-3">
+                              <div className="detail-section">
+                                <h6>Action Steps</h6>
+                                <ul>
                                   {rec.details.steps.map((step, stepIndex) => (
-                                    <li key={stepIndex} className="flex items-start">
-                                      <span className="text-blue-400 mr-2 mt-1">→</span>
+                                    <li key={stepIndex}>
+                                      <span className="step-arrow">→</span>
                                       {step}
                                     </li>
                                   ))}
                                 </ul>
                                 
-                                <h6 className="font-semibold text-gray-900 mb-2">Key Performance Indicators</h6>
-                                <ul className="text-sm text-gray-600 space-y-1">
+                                <h6>Key Performance Indicators</h6>
+                                <ul>
                                   {rec.details.kpis.map((kpi, kpiIndex) => (
-                                    <li key={kpiIndex} className="flex items-start">
-                                      <span className="text-green-400 mr-2 mt-1">📊</span>
+                                    <li key={kpiIndex}>
+                                      <span className="kpi-icon">📊</span>
                                       {kpi}
                                     </li>
                                   ))}
@@ -741,126 +575,526 @@ const StrategicPlanning = ({ userRole }) => {
                     ))}
                   </div>
                 </div>
-
-                {/* Aircraft Impact Alert */}
-                {simulationResults.aircraftImpact && Object.keys(simulationResults.aircraftImpact).length > 0 && (
-                  <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center mb-3">
-                      <span className="text-red-600 text-xl mr-2">⚠️</span>
-                      <h4 className="text-lg font-semibold text-red-900">Critical: Aircraft Operations at Risk</h4>
-                    </div>
-                    <div className="text-sm text-red-700 mb-3">
-                      {Object.keys(simulationResults.aircraftImpact).length} aircraft will lose qualified pilots
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {Object.entries(simulationResults.aircraftImpact).map(([aircraft, impact]) => (
-                        <div key={aircraft} className="p-3 bg-white border border-red-300 rounded">
-                          <div className="font-medium text-gray-900">{aircraft}</div>
-                          <div className="text-xs text-red-600">Pilot retiring - Aircraft grounded</div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                      <div className="text-sm font-medium text-yellow-900">Immediate Actions Required:</div>
-                      <div className="text-xs text-yellow-800 mt-1">
-                        • Identify backup pilots • Accelerate pilot training • Consider aircraft redistribution
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Base Impact Analysis */}
-                {simulationResults.baseImpact && Object.keys(simulationResults.baseImpact).length > 0 && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Air Base Impact Analysis</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(simulationResults.baseImpact).map(([base, impact]) => {
-                        const criticalityLevel = impact > 10 ? 'Critical' : impact > 5 ? 'High' : 'Moderate';
-                        const colorClass = impact > 10 ? 'bg-red-50 border-red-200' : impact > 5 ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200';
-                        return (
-                          <div key={base} className={`p-4 rounded-lg border ${colorClass}`}>
-                            <div className="flex justify-between items-start mb-2">
-                              <div className="font-medium text-gray-900">{base}</div>
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                impact > 10 ? 'bg-red-100 text-red-800' : 
-                                impact > 5 ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {criticalityLevel}
-                              </span>
-                            </div>
-                            <div className="text-sm text-gray-600 mb-2">{impact} personnel retiring</div>
-                            <div className="text-xs text-gray-500">
-                              {impact > 10 ? 'Base operations severely compromised' :
-                               impact > 5 ? 'Significant operational impact expected' : 'Manageable operational impact'}
-                            </div>
-                            <div className="mt-2 text-xs font-medium">
-                              Action: {impact > 10 ? 'Emergency staffing required' :
-                                      impact > 5 ? 'Accelerated recruitment needed' : 'Standard replacement planning'}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* Squadron Impact Analysis */}
-                {simulationResults.unitImpact && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Squadron Impact Analysis</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {Object.entries(simulationResults.unitImpact).map(([unit, impact]) => {
-                        const impactLevel = impact > 5 ? 'Critical' : impact > 2 ? 'High' : 'Moderate';
-                        const colorClass = impact > 5 ? 'bg-red-50 border-red-200' : impact > 2 ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200';
-                        return (
-                          <div key={unit} className={`p-4 rounded-lg border ${colorClass}`}>
-                            <div className="flex justify-between items-start mb-2">
-                              <div className="font-medium text-gray-900">{unit}</div>
-                              <span className={`text-xs px-2 py-1 rounded ${
-                                impact > 5 ? 'bg-red-100 text-red-800' : 
-                                impact > 2 ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {impactLevel}
-                              </span>
-                            </div>
-                            <div className="text-sm text-gray-600 mb-2">{impact} personnel retiring</div>
-                            <div className="text-xs text-gray-500">
-                              {impact > 5 ? 'Squadron combat readiness at risk' :
-                               impact > 2 ? 'Operational capability reduced' : 'Minimal impact on operations'}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {simulationResults.unitReadiness && (
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Unit Readiness Status</h4>
-                    <div className="space-y-2">
-                      {simulationResults.unitReadiness.map((unit, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                          <span className="font-medium text-gray-900">{unit.unit}</span>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm text-gray-600">{unit.readyPersonnel}/{unit.totalPersonnel}</span>
-                            <span className={`badge ${
-                              parseFloat(unit.readinessPercentage) >= 90 ? 'badge-success' :
-                              parseFloat(unit.readinessPercentage) >= 80 ? 'badge-warning' : 'badge-danger'
-                            }`}>
-                              {unit.readinessPercentage}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .strategic-planning {
+          min-height: 100vh;
+          background: linear-gradient(135deg, 
+            rgba(15, 23, 42, 0.95) 0%, 
+            rgba(30, 41, 59, 0.9) 50%, 
+            rgba(51, 65, 85, 0.85) 100%
+          );
+          backdrop-filter: blur(20px);
+        }
+
+        .strategic-header {
+          background: rgba(0, 0, 0, 0.3);
+          backdrop-filter: blur(25px);
+          border-bottom: 3px solid rgba(255, 153, 0, 0.5);
+          padding: 40px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .header-content h1 {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 36px;
+          font-weight: 700;
+          color: #ff9900;
+          margin: 0 0 8px 0;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-content h2 {
+          font-size: 28px;
+          font-weight: 600;
+          color: #ffffff;
+          margin: 0 0 12px 0;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-content p {
+          color: rgba(255, 255, 255, 0.8);
+          font-size: 16px;
+          margin: 0;
+        }
+
+        .iaf-emblem {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .emblem-image {
+          width: 120px;
+          height: 120px;
+          filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.4));
+          transition: all 0.3s ease;
+        }
+
+        .emblem-image:hover {
+          transform: scale(1.05);
+          filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+        }
+
+        .emblem-fallback {
+          width: 200px;
+          height: 200px;
+          background: transparent;
+          border-radius: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 48px;
+          box-shadow: none;
+          overflow: visible;
+          border: none;
+          transition: all 0.3s ease;
+        }
+
+        .emblem-fallback:hover {
+          transform: scale(1.05);
+        }
+
+        .fallback-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 0;
+          filter: drop-shadow(0 4px 12px rgba(255, 153, 0, 0.4));
+          background: transparent;
+        }
+
+        .strategic-content {
+          padding: 40px;
+        }
+
+        .scenarios-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 24px;
+          margin-bottom: 40px;
+        }
+
+        .scenario-card {
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(20px);
+          border: 2px solid rgba(255, 255, 255, 0.15);
+          border-radius: 20px;
+          padding: 24px;
+          text-align: left;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          cursor: pointer;
+        }
+
+        .scenario-card:hover {
+          transform: translateY(-8px) scale(1.02);
+          border-color: rgba(255, 153, 0, 0.4);
+          background: rgba(255, 255, 255, 0.12);
+        }
+
+        .scenario-card.active {
+          border-color: rgba(255, 153, 0, 0.6);
+          background: rgba(255, 153, 0, 0.1);
+          box-shadow: 0 12px 35px rgba(255, 153, 0, 0.3);
+        }
+
+        .scenario-icon {
+          font-size: 48px;
+          margin-bottom: 16px;
+        }
+
+        .scenario-card h3 {
+          font-size: 20px;
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 0 0 12px 0;
+        }
+
+        .scenario-card p {
+          color: rgba(248, 250, 252, 0.8);
+          font-size: 14px;
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .planning-grid {
+          display: grid;
+          grid-template-columns: 1fr 2fr;
+          gap: 32px;
+        }
+
+        .parameters-panel {
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 20px;
+          padding: 24px;
+        }
+
+        .parameters-panel h3 {
+          font-size: 24px;
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 0 0 24px 0;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .parameter-group {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .input-group {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .input-group label {
+          font-size: 14px;
+          font-weight: 600;
+          color: rgba(248, 250, 252, 0.9);
+        }
+
+        .iaf-input {
+          width: 100%;
+          padding: 12px 16px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 12px;
+          color: #f8fafc;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+
+        .iaf-input:focus {
+          outline: none;
+          border-color: rgba(255, 153, 0, 0.5);
+          background: rgba(255, 255, 255, 0.15);
+          box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
+        }
+
+        .iaf-input option {
+          background: #1e293b;
+          color: #f8fafc;
+        }
+
+        .run-simulation-btn {
+          width: 100%;
+          background: linear-gradient(135deg, #ff9900 0%, #ffaa00 50%, #ff7700 100%);
+          border: 2px solid rgba(255, 153, 0, 0.4);
+          color: #0f172a;
+          padding: 16px 24px;
+          border-radius: 16px;
+          font-family: 'Rajdhani', sans-serif;
+          font-weight: 700;
+          font-size: 18px;
+          cursor: pointer;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 8px 25px rgba(255, 153, 0, 0.4);
+          margin-top: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+        }
+
+        .run-simulation-btn:hover:not(:disabled) {
+          background: linear-gradient(135deg, #ffaa00 0%, #ffbb00 50%, #ff8800 100%);
+          transform: translateY(-4px) scale(1.05);
+          box-shadow: 0 12px 35px rgba(255, 153, 0, 0.6);
+        }
+
+        .run-simulation-btn:disabled {
+          background: rgba(255, 255, 255, 0.1);
+          color: rgba(248, 250, 252, 0.5);
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+
+        .loading-spinner-small {
+          border: 2px solid rgba(15, 23, 42, 0.3);
+          border-top: 2px solid #0f172a;
+          border-radius: 50%;
+          width: 16px;
+          height: 16px;
+          animation: spin 1s linear infinite;
+        }
+
+        .results-panel {
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 20px;
+          min-height: 400px;
+        }
+
+        .simulation-loading {
+          padding: 60px;
+          text-align: center;
+        }
+
+        .simulation-loading h3 {
+          font-size: 24px;
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 16px 0 8px 0;
+        }
+
+        .simulation-loading p {
+          color: rgba(248, 250, 252, 0.8);
+          font-size: 16px;
+          margin: 0;
+        }
+
+        .loading-spinner {
+          border: 4px solid rgba(255, 255, 255, 0.3);
+          border-top: 4px solid #ff9900;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 16px;
+        }
+
+        .results-card {
+          padding: 24px;
+        }
+
+        .results-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 24px;
+          padding-bottom: 16px;
+          border-bottom: 2px solid rgba(255, 153, 0, 0.2);
+        }
+
+        .results-header h3 {
+          font-size: 24px;
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 0;
+        }
+
+        .risk-badge {
+          padding: 6px 12px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .risk-badge.high-risk {
+          background: rgba(239, 68, 68, 0.2);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .risk-badge.medium-risk {
+          background: rgba(245, 158, 11, 0.2);
+          color: #f59e0b;
+          border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .risk-badge.low-risk {
+          background: rgba(34, 197, 94, 0.2);
+          color: #22c55e;
+          border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .metric-card {
+          padding: 20px;
+          border-radius: 16px;
+          text-align: center;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metric-card.blue { background: rgba(59, 130, 246, 0.1); }
+        .metric-card.red { background: rgba(239, 68, 68, 0.1); }
+        .metric-card.yellow { background: rgba(245, 158, 11, 0.1); }
+        .metric-card.green { background: rgba(34, 197, 94, 0.1); }
+        .metric-card.purple { background: rgba(139, 92, 246, 0.1); }
+
+        .metric-value {
+          font-family: 'Rajdhani', sans-serif;
+          font-size: 32px;
+          font-weight: 700;
+          color: #f8fafc;
+          margin-bottom: 8px;
+        }
+
+        .metric-label {
+          font-size: 12px;
+          color: rgba(248, 250, 252, 0.8);
+          text-transform: uppercase;
+          font-weight: 600;
+        }
+
+        .recommendations-section h4 {
+          font-size: 20px;
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 0 0 16px 0;
+        }
+
+        .recommendations-list {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .recommendation-item {
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .recommendation-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px;
+          background: transparent;
+          border: none;
+          color: #f8fafc;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .recommendation-header:hover {
+          background: rgba(255, 255, 255, 0.05);
+        }
+
+        .recommendation-title {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .bullet {
+          color: #ff9900;
+          font-size: 18px;
+        }
+
+        .expand-icon {
+          color: rgba(248, 250, 252, 0.6);
+          font-size: 18px;
+        }
+
+        .recommendation-details {
+          padding: 16px;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.1);
+        }
+
+        .details-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+
+        .detail-section h6 {
+          font-weight: 700;
+          color: #f8fafc;
+          margin: 0 0 8px 0;
+          font-size: 14px;
+        }
+
+        .detail-section p {
+          color: rgba(248, 250, 252, 0.8);
+          font-size: 14px;
+          margin: 0 0 16px 0;
+        }
+
+        .detail-section ul {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 16px 0;
+        }
+
+        .detail-section li {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          color: rgba(248, 250, 252, 0.8);
+          font-size: 14px;
+          margin-bottom: 8px;
+        }
+
+        .step-arrow {
+          color: #3b82f6;
+          font-weight: 700;
+        }
+
+        .kpi-icon {
+          color: #22c55e;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+          .strategic-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 24px;
+          }
+
+          .planning-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+
+          .scenarios-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .details-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .strategic-content {
+            padding: 20px;
+          }
+
+          .header-content h1 {
+            font-size: 28px;
+          }
+
+          .header-content h2 {
+            font-size: 22px;
+          }
+
+          .metrics-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+      `}</style>
     </div>
   );
 };

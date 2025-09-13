@@ -12,6 +12,13 @@ const CommanderDashboard = ({ user }) => {
   useEffect(() => {
     fetchDashboardData();
     fetchPersonnelData();
+    
+    // Realistic update: Only refresh data every 30 minutes (like real military systems)
+    const interval = setInterval(() => {
+      fetchDashboardData();
+    }, 30 * 60 * 1000); // 30 minutes
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -63,7 +70,11 @@ const CommanderDashboard = ({ user }) => {
           'Tejas LCA': { total: 40, operational: 38, maintenance: 2 },
           'C-130J Super Hercules': { total: 12, operational: 11, maintenance: 1 },
           'Chinook CH-47': { total: 15, operational: 14, maintenance: 1 }
-        }
+        },
+        // Static data - these don't change frequently in real IAF
+        last_updated: new Date().toLocaleString(),
+        data_classification: 'RESTRICTED',
+        update_frequency: 'Every 30 minutes'
       });
     }
   };
@@ -217,9 +228,15 @@ const CommanderDashboard = ({ user }) => {
               }}
             />
             <div className="iaf-emblem-large" style={{display: 'none'}}>
-              <div className="emblem-wings">✈️</div>
-              <div className="emblem-chakra">⚡</div>
-              <div className="emblem-glow"></div>
+              <img 
+                src="/images/indian-air-force-day-air-force-day-indian-air-force-day-wallpaper-free-vector.jpg" 
+                alt="Indian Air Force" 
+                className="emblem-fallback-image"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentNode.innerHTML = '<div class="emblem-wings">✈️</div><div class="emblem-chakra">⚡</div><div class="emblem-glow"></div>';
+                }}
+              />
             </div>
           </div>
         </div>
@@ -684,8 +701,8 @@ const CommanderDashboard = ({ user }) => {
 
         .iaf-background-container {
           position: relative;
-          width: 300px;
-          height: 200px;
+          width: 350px;
+          height: 300px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -710,8 +727,8 @@ const CommanderDashboard = ({ user }) => {
         }
 
         .iaf-emblem-large {
-          width: 200px;
-          height: 200px;
+          width: 280px;
+          height: 280px;
           background: linear-gradient(135deg, #ff9900, #ffaa00);
           border-radius: 50%;
           display: flex;
@@ -719,14 +736,22 @@ const CommanderDashboard = ({ user }) => {
           justify-content: center;
           position: relative;
           box-shadow: 
-            0 20px 60px rgba(255, 153, 0, 0.4),
-            inset 0 4px 0 rgba(255, 255, 255, 0.2);
+            0 25px 80px rgba(255, 153, 0, 0.5),
+            inset 0 6px 0 rgba(255, 255, 255, 0.2);
           animation: glow-pulse 3s ease-in-out infinite;
         }
 
         .emblem-wings {
           font-size: 60px;
           animation: fly 4s ease-in-out infinite;
+        }
+
+        .emblem-fallback-image {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          border-radius: 50%;
+          filter: drop-shadow(0 4px 12px rgba(255, 153, 0, 0.4));
         }
 
         .emblem-glow {

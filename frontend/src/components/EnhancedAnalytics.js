@@ -20,34 +20,8 @@ const EnhancedAnalytics = ({ userRole }) => {
     equipment: { current: 89.7, trend: '-0.5%', status: 'good' }
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealtimeData(prev => ({
-        personnel: {
-          current: prev.personnel.current + Math.floor(Math.random() * 10 - 5),
-          trend: `${(Math.random() * 4 - 2).toFixed(1)}%`,
-          status: Math.random() > 0.8 ? 'alert' : 'optimal'
-        },
-        readiness: {
-          current: Math.max(85, Math.min(98, prev.readiness.current + (Math.random() * 2 - 1))),
-          trend: `${(Math.random() * 3 - 1.5).toFixed(1)}%`,
-          status: 'excellent'
-        },
-        missions: {
-          current: Math.max(0, prev.missions.current + Math.floor(Math.random() * 6 - 3)),
-          trend: `${(Math.random() * 20 - 10).toFixed(0)}%`,
-          status: 'active'
-        },
-        equipment: {
-          current: Math.max(80, Math.min(95, prev.equipment.current + (Math.random() * 2 - 1))),
-          trend: `${(Math.random() * 2 - 1).toFixed(1)}%`,
-          status: 'good'
-        }
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // Removed unrealistic 5-second updates - real IAF data doesn't change that frequently
+  // Data updates only when time range changes or manual refresh
 
   useEffect(() => {
     // Update data when time range changes
@@ -164,16 +138,23 @@ const EnhancedAnalytics = ({ userRole }) => {
           <h3>Squadron Activity Levels</h3>
           <div className="chart-placeholder">
             <div className="activity-bars">
-              {['1 Squadron', '7 Squadron', '17 Squadron', '26 Squadron', 'Transport Wing', 'Helicopter Unit'].map((squadron, index) => (
-                <div key={squadron} className="activity-bar">
-                  <div className="bar-label">{squadron}</div>
+              {[
+                { name: '1 Squadron (Tigers)', readiness: 94 },
+                { name: '7 Squadron (Battleaxes)', readiness: 89 },
+                { name: '17 Squadron (Golden Arrows)', readiness: 92 },
+                { name: '26 Squadron (Warriors)', readiness: 87 },
+                { name: 'Transport Wing', readiness: 91 },
+                { name: 'Helicopter Unit', readiness: 85 }
+              ].map((squadron) => (
+                <div key={squadron.name} className="activity-bar">
+                  <div className="bar-label">{squadron.name}</div>
                   <div className="bar-container">
                     <div 
                       className="bar-fill" 
-                      style={{ width: `${Math.random() * 80 + 20}%` }}
+                      style={{ width: `${squadron.readiness}%` }}
                     ></div>
                   </div>
-                  <div className="bar-value">{Math.floor(Math.random() * 40 + 60)}%</div>
+                  <div className="bar-value">{squadron.readiness}%</div>
                 </div>
               ))}
             </div>
@@ -862,6 +843,20 @@ const EnhancedAnalytics = ({ userRole }) => {
           font-size: 12px;
           font-weight: 600;
           color: #ff9900;
+        }
+
+        .data-classification {
+          margin-top: 16px;
+          padding: 8px 12px;
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: 8px;
+          font-size: 11px;
+          color: #ef4444;
+          text-align: center;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .radar-chart {

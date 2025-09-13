@@ -294,31 +294,31 @@ const VoiceInterface = ({ onCommand, userRole }) => {
 
         {/* Transcript Display */}
         {transcript && (
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Transcript:</h4>
-            <p className="text-gray-900">{transcript}</p>
+          <div className="bg-gray-800 rounded-lg p-4 mb-4 border border-gray-600">
+            <h4 className="text-sm font-medium text-gray-200 mb-2">Transcript:</h4>
+            <p className="text-white font-medium">{transcript}</p>
           </div>
         )}
 
         {/* Status Indicators */}
         <div className="grid grid-cols-3 gap-4 text-center">
-          <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="p-3 bg-gray-700 rounded-lg border border-gray-600">
             <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${
               isSupported ? 'bg-green-500' : 'bg-red-500'
             }`}></div>
-            <p className="text-xs text-gray-600">Speech Recognition</p>
+            <p className="text-xs text-gray-200 font-medium">Speech Recognition</p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="p-3 bg-gray-700 rounded-lg border border-gray-600">
             <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${
               'speechSynthesis' in window ? 'bg-green-500' : 'bg-red-500'
             }`}></div>
-            <p className="text-xs text-gray-600">Text-to-Speech</p>
+            <p className="text-xs text-gray-200 font-medium">Text-to-Speech</p>
           </div>
-          <div className="p-3 bg-gray-50 rounded-lg">
+          <div className="p-3 bg-gray-700 rounded-lg border border-gray-600">
             <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${
               isListening ? 'bg-blue-500' : 'bg-gray-400'
             }`}></div>
-            <p className="text-xs text-gray-600">Microphone</p>
+            <p className="text-xs text-gray-200 font-medium">Microphone</p>
           </div>
         </div>
       </div>
@@ -331,10 +331,10 @@ const VoiceInterface = ({ onCommand, userRole }) => {
             <button
               key={index}
               onClick={() => processVoiceCommand(command.text)}
-              className="flex items-center space-x-2 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center space-x-2 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors border border-gray-600"
             >
               <span className="text-lg">{command.icon}</span>
-              <span className="text-sm font-medium text-gray-700">{command.text}</span>
+              <span className="text-sm font-medium text-gray-200">{command.text}</span>
             </button>
           ))}
         </div>
@@ -345,32 +345,32 @@ const VoiceInterface = ({ onCommand, userRole }) => {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Voice Commands Guide</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Personnel Commands:</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h4 className="font-medium text-gray-200 mb-2">Personnel Commands:</h4>
+            <ul className="text-sm text-gray-300 space-y-1">
               <li>• "Show personnel information"</li>
               <li>• "Find officer [name]"</li>
               <li>• "Personnel count by unit"</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Training Commands:</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h4 className="font-medium text-gray-200 mb-2">Training Commands:</h4>
+            <ul className="text-sm text-gray-300 space-y-1">
               <li>• "Check my training status"</li>
               <li>• "Upcoming training courses"</li>
               <li>• "Training completion rate"</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Leave Commands:</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h4 className="font-medium text-gray-200 mb-2">Leave Commands:</h4>
+            <ul className="text-sm text-gray-300 space-y-1">
               <li>• "Apply for leave"</li>
               <li>• "Check leave balance"</li>
               <li>• "Pending leave requests"</li>
             </ul>
           </div>
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Mission Commands:</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h4 className="font-medium text-gray-200 mb-2">Mission Commands:</h4>
+            <ul className="text-sm text-gray-300 space-y-1">
               <li>• "Mission readiness status"</li>
               <li>• "Active operations"</li>
               <li>• "Equipment availability"</li>
