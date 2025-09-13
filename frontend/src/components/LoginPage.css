@@ -1,0 +1,337 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b  25%, #334155 50%, #475569 75%, #64748b 100%);
+}
+
+.login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(14, 165, 233, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(147, 197, 253, 0.2) 0%, transparent 50%);
+  animation: backgroundShift 20s ease-in-out infinite;
+}
+
+@keyframes backgroundShift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  33% { transform: translateX(-20px) translateY(10px); }
+  66% { transform: translateX(20px) translateY(-10px); }
+}
+
+.login-content {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 24px;
+  padding: 48px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.8s ease-out;
+  position: relative;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.iaf-logo {
+  margin-bottom: 24px;
+}
+
+.logo-circle {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+.logo-text {
+  font-size: 28px;
+  font-weight: 900;
+  color: white;
+  letter-spacing: 2px;
+}
+
+@keyframes logoFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.025em;
+}
+
+.login-subtitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #475569;
+  margin: 0 0 12px 0;
+}
+
+.login-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.role-selection {
+  margin-bottom: 32px;
+}
+
+.selection-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.role-card {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border: 2px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+.role-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.role-card.selected {
+  border-color: #0ea5e9;
+  background: rgba(14, 165, 233, 0.05);
+  box-shadow: 0 8px 25px rgba(14, 165, 233, 0.2);
+}
+
+.role-card.purple.selected { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.05); }
+.role-card.blue.selected { border-color: #3b82f6; background: rgba(59, 130, 246, 0.05); }
+.role-card.green.selected { border-color: #10b981; background: rgba(16, 185, 129, 0.05); }
+.role-card.orange.selected { border-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
+.role-card.gray.selected { border-color: #6b7280; background: rgba(107, 114, 128, 0.05); }
+
+.role-icon {
+  font-size: 32px;
+  margin-right: 20px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.role-info {
+  flex: 1;
+}
+
+.role-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.role-description {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+.role-selector {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.role-card.selected .role-selector {
+  border-color: #0ea5e9;
+  background: #0ea5e9;
+}
+
+.role-card.purple.selected .role-selector { border-color: #8b5cf6; background: #8b5cf6; }
+.role-card.blue.selected .role-selector { border-color: #3b82f6; background: #3b82f6; }
+.role-card.green.selected .role-selector { border-color: #10b981; background: #10b981; }
+.role-card.orange.selected .role-selector { border-color: #f59e0b; background: #f59e0b; }
+.role-card.gray.selected .role-selector { border-color: #6b7280; background: #6b7280; }
+
+.selector-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.role-card.selected .selector-dot {
+  opacity: 1;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0.6;
+}
+
+.login-btn.active {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  opacity: 1;
+  box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+}
+
+.login-btn.active:hover {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(14, 165, 233, 0.5);
+}
+
+.login-btn:disabled {
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-btn .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.login-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.security-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #10b981;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.security-icon {
+  font-size: 16px;
+}
+
+.version-info {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .login-content {
+    padding: 32px 24px;
+    margin: 20px;
+    border-radius: 20px;
+  }
+  
+  .login-title {
+    font-size: 28px;
+  }
+  
+  .login-subtitle {
+    font-size: 18px;
+  }
+  
+  .role-card {
+    padding: 16px;
+  }
+  
+  .role-icon {
+    font-size: 28px;
+    margin-right: 16px;
+  }
+  
+  .role-title {
+    font-size: 15px;
+  }
+  
+  .role-description {
+    font-size: 13px;
+  }
+  
+  .login-btn {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+  
+  .login-footer {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}
+
+/* Animations */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

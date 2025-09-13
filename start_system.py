@@ -1,53 +1,76 @@
 #!/usr/bin/env python3
+"""
+Start script for IAF Human Management System
+Runs both Django backend and React frontend
+"""
+
 import subprocess
 import sys
-import time
 import os
+import time
+import threading
+from pathlib import Path
 
-def start_backend():
-    print("Starting Django backend...")
-    backend_process = subprocess.Popen([
-        sys.executable, 'manage.py', 'runserver', '8000'
-    ], cwd='/home/master/Documents/hackathon2025')
-    return backend_process
+def run_django():
+    """Run Django development server"""
+    print("🚀 Starting Django Backend Server...")
+    try:
+        subprocess.run([
+            sys.executable, 'manage.py', 'runserver', '8000'
+        ], cwd=Path(__file__).parent)
+    except KeyboardInterrupt:
+        print("\n🛑 Django server stopped")
 
-def install_frontend_deps():
-    print("Installing frontend dependencies...")
-    subprocess.run(['npm', 'install'], cwd='/home/master/Documents/hackathon2025/frontend')
+def run_react():
+    """Run React development server"""
+    print("🚀 Starting React Frontend Server...")
+    time.sleep(3)  # Wait for Django to start
+    try:
+        subprocess.run([
+            'npm', 'start'
+        ], cwd=Path(__file__).parent / 'frontend')
+    except KeyboardInterrupt:
+        print("\n🛑 React server stopped")
 
-def start_frontend():
-    print("Starting React frontend...")
-    frontend_process = subprocess.Popen([
-        'npm', 'start'
-    ], cwd='/home/master/Documents/hackathon2025/frontend')
-    return frontend_process
+def main():
+    """Main function to start both servers"""
+    print("=" * 60)
+    print("IAF HUMAN MANAGEMENT SYSTEM")
+    print("=" * 60)
+    print("Starting full-stack application...")
+    print()
+    
+    # Check if personnel data exists
+    if not os.path.exists('personnel_data.csv'):
+        print("⚠️  Personnel data not found. Generating data...")
+        subprocess.run([sys.executable, 'generate_data.py'])
+        print("✅ Data generated successfully!")
+        print()
+    
+    # Check if ML models exist
+    model_files = [
+        'advanced_attrition_model.pkl',
+        'advanced_readiness_model.pkl', 
+        'advanced_leadership_model.pkl'
+    ]
+    
+    if not all(os.path.exists(f) for f in model_files):
+        print("⚠️  ML models not found. Training models...")
+        subprocess.run([sys.executable, 'train_advanced_models.py'])
+        print("✅ Models trained successfully!")
+        print()
+    
+    try:
+        # Start Django in a separate thread
+        django_thread = threading.Thread(target=run_django, daemon=True)
+        django_thread.start()
+        
+        # Start React in main thread
+        run_react()
+        
+    except KeyboardInterrupt:
+        print("\n\n🛑 Shutting down IAF Human Management System...")
+        print("Thank you for using the system!")
 
 if __name__ == "__main__":
-    try:
-        # Start backend
-        backend = start_backend()
-        time.sleep(3)
-        
-        # Install and start frontend
-        install_frontend_deps()
-        frontend = start_frontend()
-        
-        print("\n" + "="*50)
-        print("IAF Human Management System Started!")
-        print("Backend: http://localhost:8000")
-        print("Frontend: http://localhost:3000")
-        print("="*50)
-        print("\nPress Ctrl+C to stop all services")
-        
-        # Wait for processes
-        try:
-            backend.wait()
-            frontend.wait()
-        except KeyboardInterrupt:
-            print("\nShutting down services...")
-            backend.terminate()
-            frontend.terminate()
-            
-    except Exception as e:
-        print(f"Error starting system: {e}")
-        sys.exit(1)
+    main()
