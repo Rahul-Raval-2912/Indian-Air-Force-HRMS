@@ -391,7 +391,7 @@ const AuthPage = ({ onLogin }) => {
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .auth-container {
           background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
         }

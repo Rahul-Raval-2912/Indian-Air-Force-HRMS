@@ -92,7 +92,36 @@ const PersonnelDashboard = ({ user }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="loading-spinner"></div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading Personal Dashboard...</p>
+        </div>
+        <style>{`
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+          }
+          .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 153, 0, 0.2);
+            border-top: 4px solid #ff9900;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          .loading-text {
+            color: #ff9900;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+          }
+        `}</style>
       </div>
     );
   }

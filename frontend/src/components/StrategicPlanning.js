@@ -6,6 +6,8 @@ const StrategicPlanning = ({ userRole }) => {
   const [simulationResults, setSimulationResults] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [expandedRecommendation, setExpandedRecommendation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [parameters, setParameters] = useState({
     retirement: { age: 58, percentage: 15 },
     redeployment: { fromUnit: '', toUnit: '', percentage: 20 },
@@ -18,7 +20,16 @@ const StrategicPlanning = ({ userRole }) => {
 
   const fetchPersonnelData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/personnel/');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const response = await fetch('/api/personnel/', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) throw new Error('Backend not available');
       const data = await response.json();
       setPersonnelData(data);
     } catch (error) {
@@ -581,7 +592,7 @@ const StrategicPlanning = ({ userRole }) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .strategic-planning {
           min-height: 100vh;
           background: linear-gradient(135deg, 

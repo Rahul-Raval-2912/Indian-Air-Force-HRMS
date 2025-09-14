@@ -11,19 +11,29 @@ const CommanderDashboard = ({ user }) => {
 
   useEffect(() => {
     fetchDashboardData();
-    fetchPersonnelData();
-    
-    // Realistic update: Only refresh data every 30 minutes (like real military systems)
-    const interval = setInterval(() => {
-      fetchDashboardData();
-    }, 30 * 60 * 1000); // 30 minutes
-    
-    return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'personnel' && personnel.length === 0) {
+      fetchPersonnelData();
+    }
+  }, [activeTab]);
+
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/personnel/dashboard_stats/');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch('/api/personnel/dashboard_stats/', {
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) throw new Error('Backend not available');
       const data = await response.json();
       setStats(data);
@@ -31,12 +41,12 @@ const CommanderDashboard = ({ user }) => {
       console.log('Using mock data - backend not available');
       // Enhanced mock data with IAF-specific units
       setStats({
-        total_personnel: 10000,
-        high_attrition_risk: 850,
+        total_personnel: 500000,
+        high_attrition_risk: 42500,
         avg_readiness: 82.5,
-        high_leadership_potential: 1250,
+        high_leadership_potential: 62500,
         operational_readiness: 87.3,
-        mission_critical_personnel: 2340,
+        mission_critical_personnel: 125000,
         units: {
           '1 Squadron (Tigers)': 450,
           '7 Squadron (Battleaxes)': 420,
@@ -77,48 +87,57 @@ const CommanderDashboard = ({ user }) => {
         update_frequency: 'Every 30 minutes'
       });
     }
+    setLoading(false);
   };
 
   const fetchPersonnelData = async () => {
+    if (personnel.length > 0) return; // Don't reload if already loaded
+    
     try {
-      const response = await fetch('http://localhost:8000/api/personnel/');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const response = await fetch('/api/personnel/?limit=15', {
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (!response.ok) throw new Error('Backend not available');
       const data = await response.json();
-      setPersonnel(data);
-      setLoading(false);
+      setPersonnel(data.personnel || data);
     } catch (error) {
       console.log('Using mock personnel data - backend not available');
-      // Enhanced mock data with IAF ranks and units
-      const iafRanks = ['Air Marshal', 'Air Vice Marshal', 'Air Commodore', 'Group Captain', 'Wing Commander', 'Squadron Leader', 'Flight Lieutenant', 'Flying Officer', 'Pilot Officer'];
-      const iafUnits = ['1 Squadron (Tigers)', '7 Squadron (Battleaxes)', '17 Squadron (Golden Arrows)', '26 Squadron (Warriors)', 'Transport Wing', 'Helicopter Unit', 'Training Command', 'Maintenance Wing'];
+      // Reduced mock data for faster loading
+      const iafRanks = ['Air Marshal', 'Air Vice Marshal', 'Air Commodore', 'Group Captain', 'Wing Commander', 'Squadron Leader'];
+      const iafUnits = ['1 Squadron', '7 Squadron', '17 Squadron', '26 Squadron', 'Transport Wing', 'Helicopter Unit'];
       
-      const mockPersonnel = Array.from({length: 100}, (_, i) => ({
+      const mockPersonnel = Array.from({length: 50}, (_, i) => ({
         id: i + 1,
-        name: `${['Wg Cdr', 'Sqn Ldr', 'Flt Lt', 'Fg Offr'][i % 4]} ${['Singh', 'Sharma', 'Patel', 'Kumar', 'Gupta', 'Verma', 'Yadav', 'Mishra'][i % 8]}`,
+        name: `Officer ${i + 1}`,
         rank: iafRanks[i % iafRanks.length],
         unit: iafUnits[i % iafUnits.length],
         readiness_score: Math.floor(Math.random() * 40) + 60,
         attrition_risk: Math.random() > 0.8,
         leadership_potential: ['high', 'medium', 'low'][i % 3],
-        specialization: ['Fighter Pilot', 'Transport Pilot', 'Helicopter Pilot', 'Ground Crew', 'Technician', 'Intelligence', 'Logistics'][i % 7],
+        specialization: ['Fighter Pilot', 'Transport Pilot', 'Helicopter Pilot'][i % 3],
         years_of_service: Math.floor(Math.random() * 25) + 1,
         medals: Math.floor(Math.random() * 5)
       }));
       setPersonnel(mockPersonnel);
-      setLoading(false);
     }
   };
 
   const runSimulation = async (scenario) => {
     try {
-      const response = await fetch('http://localhost:8000/api/personnel/what_if_simulation/', {
+      const response = await fetch('/api/personnel/what_if_simulation/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           scenario: scenario,
-          personnel_ids: personnel.slice(0, 10).map(p => p.id)
+          personnel_ids: personnel.slice(0, 5).map(p => p.id)
         })
       });
       if (!response.ok) throw new Error('Backend not available');
@@ -172,7 +191,10 @@ const CommanderDashboard = ({ user }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="loading-spinner"></div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading IAF Command Center...</p>
+        </div>
       </div>
     );
   }
@@ -414,7 +436,7 @@ const CommanderDashboard = ({ user }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPersonnel.slice(0, 20).map((person) => (
+                  {filteredPersonnel.slice(0, 15).map((person) => (
                     <tr key={person.id}>
                       <td>
                         <div className="officer-info">
@@ -579,7 +601,7 @@ const CommanderDashboard = ({ user }) => {
 
       <ChatbotButton userRole="commander" />
 
-      <style jsx>{`
+      <style>{`
         .commander-dashboard {
           min-height: 100vh;
           padding: 0;
@@ -1282,6 +1304,34 @@ const CommanderDashboard = ({ user }) => {
           color: rgba(248, 250, 252, 0.8);
           margin-bottom: 8px;
           font-size: 14px;
+        }
+
+        .loading-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+        }
+
+        .loading-spinner {
+          width: 60px;
+          height: 60px;
+          border: 4px solid rgba(255, 153, 0, 0.2);
+          border-top: 4px solid #ff9900;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+          color: #ff9900;
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0;
         }
 
         /* Responsive Design */

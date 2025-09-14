@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Settings from './Settings';
+import Notifications from './Notifications';
 
 const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -138,12 +142,18 @@ const Navbar = ({ user, onLogout }) => {
 
             {/* Action Buttons */}
             <div className="nav-actions">
-              <button className="action-btn notification-btn">
+              <button 
+                className="action-btn notification-btn"
+                onClick={() => setShowNotifications(true)}
+              >
                 <span className="btn-icon">🔔</span>
                 <div className="notification-badge">3</div>
               </button>
               
-              <button className="action-btn settings-btn">
+              <button 
+                className="action-btn settings-btn"
+                onClick={() => setShowSettings(true)}
+              >
                 <span className="btn-icon">⚙️</span>
               </button>
 
@@ -195,7 +205,21 @@ const Navbar = ({ user, onLogout }) => {
         )}
       </nav>
 
-      <style jsx>{`
+      {/* Settings Modal */}
+      <Settings 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+        user={user} 
+      />
+
+      {/* Notifications Modal */}
+      <Notifications 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+        user={user} 
+      />
+
+      <style>{`
         .iaf-navbar {
           background: rgba(15, 23, 42, 0.95);
           backdrop-filter: blur(20px);

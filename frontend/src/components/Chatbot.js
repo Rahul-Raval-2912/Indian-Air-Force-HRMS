@@ -232,7 +232,7 @@ const Chatbot = ({ isOpen, onClose, userRole }) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .chatbot-overlay {
           position: fixed;
           top: 0;

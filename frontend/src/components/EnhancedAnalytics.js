@@ -630,7 +630,7 @@ const EnhancedAnalytics = ({ userRole }) => {
       {activeTab === 'advanced' && renderAdvancedVisualizations()}
       {activeTab === 'comparative' && renderComparativeAnalysis()}
 
-      <style jsx>{`
+      <style>{`
         .enhanced-analytics {
           min-height: 100vh;
           padding: 0;
